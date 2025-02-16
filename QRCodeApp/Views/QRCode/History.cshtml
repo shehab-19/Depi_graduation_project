@@ -1,0 +1,102 @@
+﻿@model List<QRCodeApp.Models.QRCode>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "QR Code History";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center text-primary fw-bold">
+        <i class="fas fa-history"></i> QR Code History
+    </h2>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive mt-4">
+            <table class="table table-hover shadow-lg rounded">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>QR Code</th>
+                        <th style="width: 300px;">Content</th>
+                        <th>Created At</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center align-middle">
+                    @{
+                        int index = 1;
+                    }
+                    @foreach (var qr in Model)
+                    {
+                        <tr class="border-bottom">
+                            <td class="fw-bold">@index</td>
+                            <td>
+                                <a href="@qr.ImagePath" target="_blank">
+                                    <img src="@qr.ImagePath" alt="QR Code" class="img-thumbnail shadow-sm" width="80">
+                                </a>
+                            </td>
+                            <td class="content-cell" title="@qr.Content">
+                                @qr.Content
+                            </td>
+                            <td>
+                                <i class="far fa-clock"></i> @qr.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                            </td>
+                            <td>
+                                <a href="@qr.ImagePath" download="QRCode.png" class="btn btn-success">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center mt-4 shadow-sm">
+            <i class="fas fa-exclamation-circle"></i> No QR codes generated yet.
+        </div>
+    }
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-lg btn-secondary shadow">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+</div>
+
+<style>
+    table th, table td {
+        border-right: 1px solid #dee2e6;
+    }
+
+    table th:last-child, table td:last-child {
+        border-right: none;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .img-thumbnail {
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .img-thumbnail:hover {
+        transform: scale(1.1);
+    }
+
+    .content-cell {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-wrap: break-word;
+        font-weight: 500;
+        color: #333;
+    }
+</style>

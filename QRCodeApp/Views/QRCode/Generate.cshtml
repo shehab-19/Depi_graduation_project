@@ -1,0 +1,42 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Generate QR Code";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4 text-primary fw-bold">
+                    <i class="fas fa-qrcode"></i> Generate QR Code
+                </h2>
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Enter Content:</label>
+                        <input type="text" name="content" class="form-control" placeholder="Enter text or URL" required />
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-qrcode"></i> Generate QR Code
+                        </button>
+                    </div>
+                </form>
+
+                @if (ViewBag.QRCodePath != null)
+                {
+                    <div class="mt-4 text-center">
+                        <h4>Generated QR Code:</h4>
+                        <img src="@ViewBag.QRCodePath" alt="QR Code" class="img-fluid mt-2 border p-2" />
+                        <div class="mt-3">
+                            <a href="@ViewBag.QRCodePath" download="QRCode.png" class="btn btn-success">
+                                <i class="fas fa-download"></i> Download QR Code
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

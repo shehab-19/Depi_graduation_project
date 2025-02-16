@@ -1,0 +1,47 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Scan QR Code";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4" style="color: rgb(21, 115, 71); font-weight: bold;">
+                    <i class="fas fa-camera me-2"></i> Scan QR Code
+                </h2>
+
+                <form method="post" enctype="multipart/form-data" asp-action="DecodeQR">
+                    <div class="mb-3">
+                        <label class="form-label">Upload QR Code Image:</label>
+                        <input type="file" name="file" class="form-control" accept="image/*" required />
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-lg px-4 py-2 shadow">
+                            <i class="fas fa-camera me-2"></i> Scan QR Code
+                        </button>
+                    </div>
+                </form>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger text-center mt-3">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                @if (ViewBag.DecodedContent != null)
+                {
+                    <div class="mt-4 text-center">
+                        <h4>Decoded Content:</h4>
+                        <p class="mt-2 alert alert-info">@ViewBag.DecodedContent</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
