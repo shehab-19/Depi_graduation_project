@@ -1,10 +1,13 @@
 networks:
   qrcodeapp:
 
+volumes:
+  sql_data:
+
 services:
   sql-db:
     container_name: qrcode-db
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/azure-sql-edge
     ports:
       - 8002:1433
     environment:
