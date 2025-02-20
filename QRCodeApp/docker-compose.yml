@@ -1,9 +1,6 @@
 networks:
   qrcodeapp:
 
-volumes:
-  sql_data:
-
 services:
   sql-db:
     container_name: qrcode-db
@@ -15,6 +12,7 @@ services:
       - MSSQL_SA_PASSWORD=password@12345
     networks:
       - qrcodeapp
+    mem_limit: 700m
 
   qrcodeapp:
     container_name: qrcode-app
@@ -28,3 +26,4 @@ services:
       - sql-db
     networks:
      - qrcodeapp
+    mem_limit: 250m
