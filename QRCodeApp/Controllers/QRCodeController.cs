@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using QRCodeApp.Data;
-using QRCodeApp.Models;
-using QRCoder;
+using ZXing;
+using ZXing.Common;
+using SkiaSharp;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Drawing; 
-using System.Drawing.Imaging;
-using ZXing;
-using ZXing.Windows.Compatibility;
+using QRCodeApp.Data;
+using QRCoder;
+using QRCodeApp.Models;
 
 namespace QRCodeApp.Controllers
 {
@@ -84,23 +83,64 @@ namespace QRCodeApp.Controllers
             try
             {
                 // Read the uploaded file into a byte array
-                using (var stream = file.OpenReadStream())
+                using (var memoryStream = new MemoryStream())
                 {
-                    // Convert the stream to a Bitmap
-                    using (var bitmap = (Bitmap)Image.FromStream(stream))
-                    {
-                        // Use ZXing to decode the QR code
-                        var reader = new BarcodeReader();
-                        var result = reader.Decode(bitmap);
+                    file.CopyTo(memoryStream);
+                    // Important: Reset the position of the stream before reading
+                    memoryStream.Position = 0;
 
-                        // Handling the Scan Result
-                        if (result != null)
+                    // Validate file type
+                    var fileExtension = Path.GetExtension(file.FileName).ToLower();
+                    if (!new[] { ".jpg", ".jpeg", ".png", ".bmp" }.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("", "Only JPG, PNG and BMP image files are supported.");
+                        return View("Scan");
+                    }
+
+                    using (var skBitmap = SKBitmap.Decode(memoryStream))
+                    {
+                        if (skBitmap == null)
                         {
-                            ViewBag.DecodedContent = result.Text;
+                            ModelState.AddModelError("", "Invalid image format.");
+                            return View("Scan");
                         }
-                        else
+
+                        // Convert SKBitmap to BGRA byte array
+                        var info = new SKImageInfo(skBitmap.Width, skBitmap.Height, SKColorType.Bgra8888);
+                        using (var convertedBitmap = new SKBitmap(info))
                         {
-                            ModelState.AddModelError("", "No QR code found in the image.");
+                            var samplingOptions = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
+                            if (!skBitmap.ScalePixels(convertedBitmap, samplingOptions))
+                            {
+                                ModelState.AddModelError("", "Failed to process the image.");
+                                return View("Scan");
+                            }
+
+                            // Create BarcodeReader with optimized settings
+                            var reader = new BarcodeReaderGeneric
+                            {
+                                AutoRotate = true,
+                                Options = new DecodingOptions
+                                {
+                                    TryHarder = true,
+                                    TryInverted = true,
+                                    PossibleFormats = new[] { BarcodeFormat.QR_CODE }
+                                }
+                            };
+
+                            // Create luminance source and decode
+                            var luminanceSource = new RGBLuminanceSource(convertedBitmap.Bytes, convertedBitmap.Width, convertedBitmap.Height, RGBLuminanceSource.BitmapFormat.BGRA32);
+                            var result = reader.Decode(luminanceSource);
+
+                            // Handling the Scan Result
+                            if (result != null)
+                            {
+                                ViewBag.DecodedContent = result.Text;
+                            }
+                            else
+                            {
+                                ModelState.AddModelError("", "No QR code found in the image.");
+                            }
                         }
                     }
                 }
