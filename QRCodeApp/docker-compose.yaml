@@ -9,7 +9,7 @@ services:
       - 1433:1433
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=12345678
+      - MSSQL_SA_PASSWORD=MY_db_password123
     networks:
       - qrcodeapp
     mem_limit: 900m
@@ -27,8 +27,8 @@ services:
     environment:
       - DB_HOST=sql-db
       - DB_NAME=QRCodeDatabase
-      - DB_USER=mohamed
-      - DB_PASSWORD=12345678
+      - DB_USER=sa
+      - DB_PASSWORD=MY_db_password123
     networks:
       - qrcodeapp
     mem_limit: 250m

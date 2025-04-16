@@ -19,6 +19,8 @@ spec:
         envFrom:
         - configMapRef:
             name: qrcode-app-config
+        - secretRef:
+            name: db-password
         resources:
           limits:
             memory: "250Mi"

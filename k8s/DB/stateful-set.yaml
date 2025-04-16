@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: statefulset 
+metadata:
+  name: microsoft-sql-server
+spec:
+  serviceName: "microsoft-sql-server-service"
+  selector:
+    matchLabels:
+      db: microsoft-sql-server
+  template:
+    metadata:
+      labels:
+        db: microsoft-sql-server
+    spec:
+      containers:
+      - name: microsoft-sql-server-container
+        image: mcr.microsoft.com/azure-sql-edge
+        env:
+          - name: ACCEPT_EULA
+            value: "Y"
+          - name: MSSQL_SA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-password
+                key: db-password
+          
