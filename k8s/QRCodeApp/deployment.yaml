@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qrcode-app
+spec:
+  selector:
+    matchLabels:
+      app: qrcode-app
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: qrcode-app
+    spec:
+      containers:
+      - name: myapp
+        image: qr_code_app
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: qrcode-app-config
+        resources:
+          limits:
+            memory: "250Mi"
+            cpu: "500m"
+        ports:  
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe: 
+          httpGet:
+              path: /
+              port: http
+
