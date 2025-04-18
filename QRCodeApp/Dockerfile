@@ -27,4 +27,7 @@ RUN apt-get update && apt-get install -y \
 # Copy the built application
 COPY --from=build /app .
 
+EXPOSE 8080
+
+
 ENTRYPOINT ["dotnet", "QRCodeApp.dll"]

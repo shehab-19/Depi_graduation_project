@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qrcode-deployment
+  namespace: default
+  labels:
+    tier: application
+
+
+spec:
+  replicas: 3
+  selector: 
+    matchLabels:
+      tier: application
+
+  template:
+    metadata:
+      labels:
+        tier: application
+    spec:
+      containers:
+        - name: qrcode
+          image: shehab19/qrcodeapp:mssql
+          ports:
+            - protocol: TCP
+              containerPort: 8080
+              name: qrcode      
+
+          # resources:
+          #   requests:
+          #     memory: "64Mi"   # Minimum memory guaranteed (64 MiB)
+          #     cpu: "250m"      # Minimum CPU guaranteed (250 millicores = 0.25 vCPU)
+          #   limits:
+          #     memory: "128Mi"  # Maximum memory the pod can use (128 MiB)
+          #     cpu: "500m"      # Maximum CPU the pod can use (500 millicores = 0.5 vCPU)
+
+
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution: # Possible keys: requiredDuringSchedulingIgnoredDuringExecution, preferredDuringSchedulingIgnoredDuringExecution
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: color
+      #           operator: In # Possible operators: In, NotIn, Exists, DoesNotExist, Gt, Lt
+      #           values:
+      #           - blue
+
+
