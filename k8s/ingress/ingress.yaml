@@ -19,3 +19,15 @@ spec:
                 name: qrcode-app-service
                 port:
                   number: 9001
+    
+    - host: jenkins.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: 
+                name: jenkins-service
+                port:
+                  number: 8080 
+                  

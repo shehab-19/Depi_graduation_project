@@ -2,33 +2,30 @@ networks:
   qrcodeapp:
 
 services:
-  sql-db:
+  sqll-db:
     container_name: qrcode-db
-    image: mcr.microsoft.com/azure-sql-edge
+    image: mcr.microsoft.com/azure-sql-edge:2.0.0
     ports:
-      - ${EXTERNAL_DB_PORT}:${DB_PORT}
+      - 1433:1433
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - MSSQL_SA_PASSWORD=password@1222345
     networks:
       - qrcodeapp
-    mem_limit: 700m
+    # mem_limit: 700m
 
   qrcodeapp:
     container_name: qrcode-app
-    image: ${DOCKER_REGISTRY-}qrcodeapp
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: qrcodeapp:mssql
     ports:
-      - ${EXTERNAL_APP_PORT}:${APP_PORT}
-    depends_on:
-      - sql-db
+      - 8201:8080
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=sqll-db
+      - DB_NAME=QRCodeDB
+      - DB_USER=sa
+      - DB_PASSWORD=password@1222345
+    depends_on:
+      - sqll-db
     networks:
       - qrcodeapp
-    mem_limit: 250m
+    # mem_limit: 250m

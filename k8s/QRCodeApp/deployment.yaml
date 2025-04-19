@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: mohamedcloud/qr_code_app:v2
+        image: mohamedcloud/qr_code_app:v3
         imagePullPolicy: IfNotPresent
         envFrom:
         - configMapRef:
@@ -29,12 +29,19 @@ spec:
           - name: http
             containerPort: 8080
             protocol: TCP
+            
         livenessProbe:
           httpGet:
             path: /
             port: http
-        readinessProbe: 
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+        readinessProbe:
           httpGet:
-              path: /
-              port: http
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
 

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using QRCodeApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,20 +6,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Load .env file
-DotNetEnv.Env.Load();
-
-// Get the connection string and replace environment variables
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Replace placeholders with actual environment variable values
-connectionString = connectionString.Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST"))
-                                     .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME"))
-                                     .Replace("${DB_USER}", Environment.GetEnvironmentVariable("DB_USER"))
-                                     .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD"));
-
+// Configure database connection directly from environment variables
+// No dependency on appsettings.json connection strings
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+{
+    var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "sql-db";
+    var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "QRCodeDB";
+    var user = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
+    var password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "password@12345";
+    
+    var connectionString = $"Data Source={host};Initial Catalog={dbName};User ID={user};Password={password};TrustServerCertificate=True";
+    options.UseSqlServer(connectionString);
+});
 
 var app = builder.Build();
 
@@ -34,13 +31,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
