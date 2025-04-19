@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress 
+metadata:
+  name: qrcode-app-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - qrcode.local
+      secretName: qr-code-app-tls
+  rules:
+    - host: qrcode.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: 
+                name: qrcode-app-service
+                port:
+                  number: 9001
+    
+    - host: jenkins.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: 
+                name: jenkins-service
+                port:
+                  number: 8080 
+                  

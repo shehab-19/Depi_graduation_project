@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: microsoft-sql-server
+spec:
+  serviceName: "microsoft-sql-server-service"
+  replicas: 1  
+  selector:
+    matchLabels:
+      db: microsoft-sql-server
+  template:
+    metadata:
+      labels:
+        db: microsoft-sql-server
+    spec:
+      containers:
+      - name: microsoft-sql-server-container
+        image: mcr.microsoft.com/azure-sql-edge
+        ports:
+        - containerPort: 1433 
+        env:
+          - name: ACCEPT_EULA
+            value: "Y"
+          - name: MSSQL_SA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-password
+                key: db-password
+        volumeMounts:
+        - name: mssql-data
+          mountPath: /var/opt/mssql  
+  volumeClaimTemplates: 
+  - metadata:
+      name: mssql-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi 
