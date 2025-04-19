@@ -5,7 +5,7 @@ metadata:
   name: qrcode-service
   namespace: default
 spec:
-  type: NodePort 
+  type: NodePort
   ports:
   - nodePort: 30080
     targetPort: 8080

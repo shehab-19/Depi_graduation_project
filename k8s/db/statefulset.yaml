@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sqll-db
+spec:
+  selector:
+    matchLabels:
+      app: mssql
+  serviceName: "mssql"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      containers:
+        - name: sqll-db
+          image: mcr.microsoft.com/azure-sql-edge:2.0.0
+          ports:
+            - containerPort: 1433
+              name: mssql
+          envFrom:
+            - secretRef:
+                name: mssql-secret
+          volumeMounts:
+            - name: mssql-data
+              mountPath: /var/opt/mssql
+  volumeClaimTemplates:
+    - metadata:
+        name: mssql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 100Mi
+

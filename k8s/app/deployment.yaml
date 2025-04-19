@@ -6,9 +6,8 @@ metadata:
   labels:
     tier: application
 
-
 spec:
-  replicas: 3
+  replicas: 1
   selector: 
     matchLabels:
       tier: application
@@ -24,7 +23,29 @@ spec:
           ports:
             - protocol: TCP
               containerPort: 8080
-              name: qrcode      
+              name: qrcode
+
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: qrcode-secret
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: qrcode-secret
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: qrcode-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qrcode-secret
+                  key: DB_PASSWORD
 
           # resources:
           #   requests:
@@ -33,7 +54,6 @@ spec:
           #   limits:
           #     memory: "128Mi"  # Maximum memory the pod can use (128 MiB)
           #     cpu: "500m"      # Maximum CPU the pod can use (500 millicores = 0.5 vCPU)
-
 
       # affinity:
       #   nodeAffinity:
@@ -44,5 +64,3 @@ spec:
       #           operator: In # Possible operators: In, NotIn, Exists, DoesNotExist, Gt, Lt
       #           values:
       #           - blue
-
-
