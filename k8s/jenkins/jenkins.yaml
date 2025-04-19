@@ -8,12 +8,11 @@ spec:
   type: ClusterIP
   ports:
     - port: 8080
-      targetPort: 8080   
+      targetPort: 8080
       name: http
     - port: 50000
       targetPort: 50000
       name: jnlp
-
 
 ---
 apiVersion: apps/v1
