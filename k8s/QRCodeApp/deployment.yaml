@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: mohamedcloud/qr_code_app:v1
+        image: mohamedcloud/qr_code_app:v2
         imagePullPolicy: IfNotPresent
         envFrom:
         - configMapRef:

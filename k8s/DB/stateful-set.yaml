@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: statefulset 
+kind: StatefulSet
 metadata:
   name: microsoft-sql-server
 spec:

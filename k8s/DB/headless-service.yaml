@@ -9,5 +9,5 @@ spec:
     db: microsoft-sql-server
   ports:  
     - port: 1433
-    #targetPort: 1443
+      targetPort: 1443
   clusterIP: None
