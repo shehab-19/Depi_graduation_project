@@ -19,11 +19,15 @@ spec:
         envFrom:
         - configMapRef:
             name: qrcode-app-config
-        - secretRef:
-            name: db-password
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-password
+              key: db-password
         resources:
           limits:
-            memory: "250Mi"
+            memory: "350Mi"
             cpu: "500m"
         ports:  
           - name: http
