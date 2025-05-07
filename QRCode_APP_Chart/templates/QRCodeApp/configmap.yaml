@@ -1,0 +1,12 @@
+{{- with .Values.ConfigMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .ConfigMapName }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+data:
+    DB_PORT: "{{ .DB_PORT }}"
+    EXTERNAL_DB_PORT: "{{ .EXTERNAL_DB_PORT }}"
+{{- end }}

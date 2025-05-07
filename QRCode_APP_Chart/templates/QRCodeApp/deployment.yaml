@@ -1,0 +1,83 @@
+{{- $root := . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.DeploymentName }}
+  labels:
+    {{- include "labels" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "labels" . | indent 2 }}
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        {{- include "labels" . | indent 4 }}
+    spec:
+      containers:
+      {{- with .Values.Containers }}
+      - name: {{ .ContainerName }}
+        image: {{ .Image }}
+        imagePullPolicy: {{ .ImagePullPolicy }}
+      {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.ConfigMap.ConfigMapName }}
+        env:
+        {{- with .Values.DB_ENVIRONMENT_VARIABLES }}
+        - name: {{ .ENV_DB_PASSWORD }}
+          valueFrom:
+            secretKeyRef:
+            {{- with $root.Values.Secret }}
+              name: db-password
+              key: db-password
+            {{- end }}
+        - name: {{ .ENV_DB_HOST }}
+          valueFrom:
+            secretKeyRef:
+            {{- with $root.Values.Secret }}
+              name: {{ .SecretName }}
+              key: {{ .DB_HOST_KEY }}
+            {{- end }}
+        - name: {{ .ENV_DB_NAME }}
+          valueFrom:
+            secretKeyRef:
+            {{- with $root.Values.Secret }}
+              name: {{ .SecretName }}
+              key: {{ .DB_NAME_KEY }}
+            {{- end }}
+        - name: {{ .ENV_DB_USER }}
+          valueFrom:
+            secretKeyRef:
+            {{- with $root.Values.Secret }}
+              name: {{ .SecretName }}
+              key: {{ .DB_USER_KEY }}
+            {{- end }}
+        {{- end }}
+
+        resources:
+          limits:
+            memory: "350Mi"
+            cpu: "500m"
+
+        ports:
+          - name: {{ $root.Values.Port.PortName }}
+            containerPort: {{ $root.Values.Port.ContainerPort }}
+            protocol: TCP
+        {{- with .Values.Port }}   
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .PortName }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .PortName }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        {{- end }}
+
