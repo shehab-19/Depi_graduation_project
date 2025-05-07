@@ -30,8 +30,8 @@ spec:
           valueFrom:
             secretKeyRef:
             {{- with $root.Values.Secret }}
-              name: db-password
-              key: db-password
+              name: {{ .SecretName }}
+              key: {{ .DB_PASSWORD_Key }}
             {{- end }}
         - name: {{ .ENV_DB_HOST }}
           valueFrom:
