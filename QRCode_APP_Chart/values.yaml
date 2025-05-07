@@ -42,8 +42,10 @@ Secret:
   DB_NAME: 
   DB_NAME_KEY: db-name
   DB_USER:
-  DB_USER_KEY: db-user
-  
+  DB_USER_KEY: db-user 
+# The above values are intentionally left empty.
+# They will be injected at deployment time using CLI arguments with --set-string and environment variables
+
 # =====================================================================
 # Ingress
 Ingress:

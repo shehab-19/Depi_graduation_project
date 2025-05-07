@@ -3,8 +3,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress 
 metadata:
   name: {{ .IngressName }}
-  annotations:
-    "helm.sh/hook-weight": "5"
 spec:
   ingressClassName: nginx
   rules:
