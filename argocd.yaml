@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qr-app
+  namespace: argocd  # Namespace where Argo CD is installed
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/shehab-19/Depi_graduation_project.git
+    targetRevision: HEAD
+    path: QRCode_APP_Chart
+    helm:
+      parameters:
+        - name: Secret.DB_PASSWORD
+          value: DevOps2024!
+          forceString: true
+        - name: Secret.DB_HOST
+          value: database-1.cduueio6c08b.us-east-1.rds.amazonaws.com
+          forceString: true
+        - name: Secret.DB_NAME
+          value: qrcode
+          forceString: true
+        - name: Secret.DB_USER
+          value: admin
+          forceString: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qr-app
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+
