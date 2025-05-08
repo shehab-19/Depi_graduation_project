@@ -24,7 +24,7 @@ resource "aws_security_group" "db_sg" {
         from_port       = 1433
         to_port         = 1433
         protocol        = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        security_groups = [aws_security_group.web_sg.id]
     }
 
     egress {
@@ -58,7 +58,7 @@ resource "aws_db_instance" "default" {
   storage_encrypted    = true 
   deletion_protection  = false
   skip_final_snapshot  = true
-  publicly_accessible  = true 
+  publicly_accessible  = false
 
   vpc_security_group_ids = [ aws_security_group.db_sg.id ]
     
@@ -71,7 +71,7 @@ resource "aws_db_instance" "default" {
 
 resource "aws_db_subnet_group" "subnet_group" {
   name       = "mydb-subnet-group"
-  subnet_ids =  [ aws_subnet.public.id , aws_subnet.public2.id ]    ######## needs to modified
+  subnet_ids =  [ aws_subnet.private1.id , aws_subnet.private2.id ]    
   tags = {
     Name = "mydb-subnet-group"
   } 

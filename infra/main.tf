@@ -33,6 +33,26 @@ resource "aws_subnet" "public2" {
     }
 }
 
+resource "aws_subnet" "private1" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.128.0/20"
+  availability_zone       = var.az
+  map_public_ip_on_launch = false
+  tags = {
+    Name = "private-subnet-1"
+  }
+}
+
+resource "aws_subnet" "private2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.144.0/20"
+  availability_zone       = var.az
+  map_public_ip_on_launch = false
+  tags = {
+    Name = "private-subnet-2"
+  }
+}
+
 
 
 resource "aws_internet_gateway" "main" {
@@ -67,7 +87,7 @@ resource "aws_route_table_association" "public" {
 
 
 resource "aws_security_group" "web_sg" {
-    name        = "web-sg"
+    name        = "controlplane-sg"
     description = "Security group for web app"
     vpc_id      = aws_vpc.main.id
 
