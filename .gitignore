@@ -3,3 +3,8 @@ obj/
 .vs/
 appsettings.Development.json
 tls.*
+*.terraform/
+*.tfstate
+*.tfstate.*
+*env.sh
+*.terraform.lock*

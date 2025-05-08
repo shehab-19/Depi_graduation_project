@@ -1,0 +1,204 @@
+resource "aws_vpc" "main" {
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
+  enable_dns_hostnames = "true"
+  enable_dns_support = "true"
+
+  tags = {
+    Name = var.vpc-name
+  }
+}
+
+
+
+resource "aws_subnet" "public" {
+    vpc_id = aws_vpc.main.id
+    cidr_block = var.public-subnet-cidr_block
+    availability_zone = var.az
+    map_public_ip_on_launch = true
+    tags = {
+        Name = "public-subnet"
+    }
+}
+
+
+
+resource "aws_subnet" "public2" {
+    vpc_id = aws_vpc.main.id
+    cidr_block = var.public-subnet-cidr_block2
+    availability_zone = var.az
+    map_public_ip_on_launch = true
+    tags = {
+        Name = "public-subnet2"
+    }
+}
+
+
+
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = var.igw-name
+  }
+}
+
+
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    
+    Name = var.public-rtb-name
+  }
+
+ route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+}
+
+
+resource "aws_route_table_association" "public" {
+    subnet_id = aws_subnet.public.id
+    route_table_id = aws_route_table.public.id
+}
+
+
+resource "aws_security_group" "web_sg" {
+    name        = "web-sg"
+    description = "Security group for web app"
+    vpc_id      = aws_vpc.main.id
+
+  
+    # web access from anywhere
+    ingress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port   = 6443
+        to_port     = 6443
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+
+    ingress  {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+        }
+
+    egress {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    tags = {
+        Name = "server-security-group"
+    }
+
+}
+
+
+
+resource "aws_key_pair" "mykey" {
+  key_name   = "mykey"
+  public_key = file("~/.ssh/aws-keypair.pub")  
+}
+
+
+
+
+
+resource "aws_instance" "controlplane" {
+  ami           = var.ami
+  instance_type = var.t2-instance_type
+  subnet_id     = aws_subnet.public.id
+  key_name      = aws_key_pair.mykey.key_name
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  depends_on = [ aws_db_instance.default ]
+  tags = {
+    Name = "controlplane"
+  }
+  
+}
+
+resource "null_resource" "fetch_token" {
+    depends_on = [aws_instance.controlplane]
+
+    connection {
+        type     = "ssh"
+        user     = "ubuntu"
+        host     = aws_instance.controlplane.public_ip
+        private_key = file("~/.ssh/aws-keypair")
+    }
+
+     provisioner "file" {
+    source      = "../QRCode_APP_Chart"
+    destination = "/home/ubuntu/"
+  }
+
+    provisioner "remote-exec" {
+    script = "./env.sh"
+  }
+
+    provisioner "remote-exec" {
+      script = "./installation.sh"
+    }
+
+    
+}
+
+# null resource fetch token 
+# take output of null resourse > remote exec from the output of the null resourse
+
+
+
+# ubuntu 22.04 ami
+# t2.medium   
+
+
+
+# one instances (controlplane and worker node) 
+# user data for installing kubernetes (kind + helm + kubectl + docker + )
+# in the machine (ec2) create env vars 
+# public access (dns public  )
+# Test 
+
+# helm install qrcode ./QRCode_APP   \
+# --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
+# --set-string Secret.DB_HOST="$DB_HOST"   \
+# --set-string Secret.DB_NAME="$DB_NAME"  \
+#  --set-string Secret.DB_USER="$DB_USER"
+
+
+
+# two instances kubeadm user data for installing kubernetes (kubeadm + helm + kubectl + 7agat moustafa )
+# insert env vars 
+# worker node ( kubeadm join )
+
+# test 
+
+# helm install qrcode ./QRCode_APP   \
+# --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
+# --set-string Secret.DB_HOST="$DB_HOST"   \
+# --set-string Secret.DB_NAME="$DB_NAME"  \
+#  --set-string Secret.DB_USER="$DB_USER"
+
+# ansible playbook 
+# copying the files 
+# running helm 
+
+
+# file provisioner remote provisioner null resourse 
+
+

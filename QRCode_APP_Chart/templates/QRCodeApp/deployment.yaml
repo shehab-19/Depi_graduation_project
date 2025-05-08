@@ -56,10 +56,10 @@ spec:
             {{- end }}
         {{- end }}
 
-        resources:
-          limits:
-            memory: "350Mi"
-            cpu: "500m"
+        # resources:
+        #   limits:
+        #     memory: "350Mi"
+        #     cpu: "500m"
 
         ports:
           - name: {{ $root.Values.Port.PortName }}
