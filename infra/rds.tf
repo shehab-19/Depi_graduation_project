@@ -71,7 +71,7 @@ resource "aws_db_instance" "default" {
 
 resource "aws_db_subnet_group" "subnet_group" {
   name       = "mydb-subnet-group"
-  subnet_ids =  [ aws_subnet.public.id , aws_subnet.public2 ]    ######## needs to modified
+  subnet_ids =  [ aws_subnet.public.id , aws_subnet.public2.id ]    ######## needs to modified
   tags = {
     Name = "mydb-subnet-group"
   } 
