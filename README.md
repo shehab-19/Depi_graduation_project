@@ -1,4 +1,4 @@
-# 🚀 DEPi Internship DevOps Project – QR Code Generator
+# 🚀 DEPI Internship DevOps Project – QR Code Reader
 > The QR Code Generator is a cloud-native, containerized application designed to generate and manage QR codes with ease. It showcases a real-world DevOps pipeline with infrastructure automation, Kubernetes-based orchestration, and secure secrets handling.
 
 > This repository is perfect for developers and DevOps engineers aiming to gain hands-on experience in deploying scalable applications using modern tools like Docker, Helm, Terraform, and Kubernetes (Kind). It follows industry-standard best practices for CI/CD and infrastructure as code (IaC).
