@@ -171,17 +171,14 @@ resource "null_resource" "fetch_token" {
   #   script = "./env.sh"
   # }
 
-        provisioner "remote-exec" {
+    provisioner "remote-exec" {
       inline = [
-        <<EOT
-        #!/bin/bash
-        sudo echo "export DB_HOST="${aws_db_instance.default.endpoint}" " >> ~/.bashrc
-        sudo echo "export DB_USER="${data.aws_ssm_parameter.db-username.value}" " >> ~/.bashrc
-        sudo echo "export DB_NAME="${data.aws_ssm_parameter.db-name.value}" " >> ~/.bashrc
-        sudo echo "export DB_PASSWORD="${data.aws_ssm_parameter.db-password.value}" " >> ~/.bashrc
-        EOT
+        "echo 'export DB_HOST=${aws_db_instance.default.endpoint}' >> ~/.bashrc",
+        "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
+        "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
+        "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc"
       ]
-  }
+    }
 
     provisioner "remote-exec" {
       script = "./installation.sh"
