@@ -67,8 +67,6 @@ Make sure Docker is installed on your system.
 
 - 🔗 [Install Docker](https://docs.docker.com/get-docker/)
 
-> Docker Compose is included with Docker Desktop on Windows and Mac. On Linux, install it separately if needed: [Install Docker Compose](https://docs.docker.com/compose/install/)
-
 ---
 
 #### ▶️ Step 2: Run the application
