@@ -2,27 +2,6 @@
 
 set -e
 
-export DEBIAN_FRONTEND=noninteractive
-export NEEDRESTART_MODE=a
-export SYSTEMD_COLORS=0
-export SYSTEMD_PAGER=
-
-alias systemctl='systemctl --no-pager'
-alias journalctl='journalctl --no-pager'
-
-# Ensure automatic restart of services
-sudo sed -i 's/^#\$nrconf{restart} = .*/$nrconf{restart} = '\''a'\'';/; s/^\$nrconf{restart} = .*/$nrconf{restart} = '\''a'\'';/' /etc/needrestart/needrestart.conf
-
-# Create directories
-mkdir -p ~/.local/bin
-
-# Update system
-sudo apt-get update
-sudo apt-get upgrade -y
-
-# Install basic tools
-sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-
 # Install Docker (required for kind)
 echo "Installing Docker..."
 sudo apt-get install -y docker.io
