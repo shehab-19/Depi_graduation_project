@@ -46,7 +46,7 @@ resource "aws_subnet" "private1" {
 resource "aws_subnet" "private2" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.144.0/20"
-  availability_zone       = var.az
+  availability_zone       = var.az2
   map_public_ip_on_launch = false
   tags = {
     Name = "private-subnet-2"
@@ -132,7 +132,7 @@ resource "aws_security_group" "web_sg" {
 
 resource "aws_key_pair" "mykey" {
   key_name   = "mykey"
-  public_key = file("~/.ssh/aws-keypair.pub")  
+  public_key = file("~/.ssh/deployer.pub")  
 }
 
 
@@ -159,7 +159,7 @@ resource "null_resource" "fetch_token" {
         type     = "ssh"
         user     = "ubuntu"
         host     = aws_instance.controlplane.public_ip
-        private_key = file("~/.ssh/aws-keypair")
+        private_key = file("~/.ssh/deployer")
     }
 
      provisioner "file" {
@@ -167,8 +167,20 @@ resource "null_resource" "fetch_token" {
     destination = "/home/ubuntu/"
   }
 
-    provisioner "remote-exec" {
-    script = "./env.sh"
+  #   provisioner "remote-exec" {
+  #   script = "./env.sh"
+  # }
+
+        provisioner "remote-exec" {
+      inline = [
+        <<EOT
+        #!/bin/bash
+        sudo echo "export DB_HOST="${aws_db_instance.default.endpoint}" " >> ~/.bashrc
+        sudo echo "export DB_USER="${data.aws_ssm_parameter.db-username.value}" " >> ~/.bashrc
+        sudo echo "export DB_NAME="${data.aws_ssm_parameter.db-name.value}" " >> ~/.bashrc
+        sudo echo "export DB_PASSWORD="${data.aws_ssm_parameter.db-password.value}" " >> ~/.bashrc
+        EOT
+      ]
   }
 
     provisioner "remote-exec" {

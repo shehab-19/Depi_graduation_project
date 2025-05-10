@@ -4,9 +4,10 @@ data "aws_ssm_parameter" "db-password" {
 data "aws_ssm_parameter" "db-username" {
   name = "/qr/dbuser"
 }
-data "aws_ssm_parameter" "db-host" {
-  name = "/qr/dbhost"
-}
+# data "aws_ssm_parameter" "db-host" {
+#   name = "/qr/dbhost"
+# }
+
 data "aws_ssm_parameter" "db-name" {
   name = "/qr/dbname"
 }
@@ -43,16 +44,16 @@ resource "aws_security_group" "db_sg" {
 
 
 resource "aws_db_instance" "default" {
-  allocated_storage    = 10
-  db_name              = data.aws_ssm_parameter.db-name.value
+  allocated_storage    = 20
+  # db_name              = data.aws_ssm_parameter.db-name.value
   identifier           = "database01"
   db_subnet_group_name = aws_db_subnet_group.subnet_group.name
-  engine               = "mssql"
+  engine               = "sqlserver-ex"
   engine_version       = "15.00.4430.1.v1"
   instance_class       = "db.t3.micro"
   username             = data.aws_ssm_parameter.db-username.value
   password             = data.aws_ssm_parameter.db-password.value
-  parameter_group_name = "default.mysql8.0"
+  # parameter_group_name = "default.mysql8.0"
   multi_az             = false
   storage_type         = "gp2"
   storage_encrypted    = true 
@@ -71,7 +72,7 @@ resource "aws_db_instance" "default" {
 
 resource "aws_db_subnet_group" "subnet_group" {
   name       = "mydb-subnet-group"
-  subnet_ids =  [ aws_subnet.private1.id , aws_subnet.private2.id ]    
+  subnet_ids =  [ aws_subnet.private1.id , aws_subnet.private2.id ]
   tags = {
     Name = "mydb-subnet-group"
   } 

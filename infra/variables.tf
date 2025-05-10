@@ -3,10 +3,10 @@ variable "az" {
     default     = "us-east-1a"
 }
 
-# variable "az2" {
-#     type        = string
-#     default     = "us-east-1a"
-# }
+variable "az2" {
+    type        = string
+    default     = "us-east-1b"
+}
 
 variable "public-subnet-cidr_block" {
     type = string
