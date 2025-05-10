@@ -56,3 +56,8 @@ variable "db-name" {
 variable "db-identifier" {
   default = "database01"
 }
+
+variable "dns-endpoint" {
+  default = "database01.cetqo8eye8lq.us-east-1.rds.amazonaws.com" 
+}
+

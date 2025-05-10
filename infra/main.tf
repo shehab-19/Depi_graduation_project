@@ -132,7 +132,7 @@ resource "aws_security_group" "web_sg" {
 
 resource "aws_key_pair" "mykey" {
   key_name   = "mykey"
-  public_key = file("~/.ssh/deployer.pub")
+  public_key = file("~/.ssh/aws-keypair.pub")
 }
 
 
@@ -145,7 +145,11 @@ resource "aws_instance" "controlplane" {
   subnet_id              = aws_subnet.public.id
   key_name               = aws_key_pair.mykey.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  depends_on             = [aws_db_instance.default]
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp2"
+  }
+  # depends_on             = [aws_db_instance.default]
   tags = {
     Name = "controlplane"
   }
@@ -159,7 +163,7 @@ resource "null_resource" "fetch_token" {
     type        = "ssh"
     user        = "ubuntu"
     host        = aws_instance.controlplane.public_ip
-    private_key = file("~/.ssh/deployer")
+    private_key = file("~/.ssh/aws-keypair")
   }
 
   provisioner "file" {
@@ -170,15 +174,18 @@ resource "null_resource" "fetch_token" {
   provisioner "file" {
     source      = "continue_installation.sh"
     destination = "/home/ubuntu/continue_installation.sh"
+    
   }
 
 
   provisioner "remote-exec" {
     inline = [
-      "bash -c 'echo export DB_HOST=${aws_db_instance.default.endpoint} >> ~/.bashrc'",
+      "bash -c 'echo export DB_HOST=${split(":", var.dns-endpoint)[0]} >> ~/.bashrc'",
+      "bash -c 'echo export DB_HOST=${var.dns-endpoint} >> ~/.bashrc'",
       "bash -c 'echo export DB_USER=${data.aws_ssm_parameter.db-username.value} >> ~/.bashrc'",
       "bash -c 'echo export DB_NAME=${data.aws_ssm_parameter.db-name.value} >> ~/.bashrc'",
       "bash -c 'echo export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value} >> ~/.bashrc'",
+      "bash -c 'echo export URL=${aws_instance.controlplane.public_dns} >> ~/.bashrc'",
       "bash -c 'source /home/ubuntu/.bashrc'"
 
     ]
@@ -190,5 +197,7 @@ resource "null_resource" "fetch_token" {
 
 }
 
-
+output "controleplane_dns" {
+  value = aws_instance.controlplane.public_dns
+}
 
