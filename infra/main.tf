@@ -166,21 +166,27 @@ resource "null_resource" "fetch_token" {
     source      = "../QRCode_APP_Chart"
     destination = "/home/ubuntu/"
   }
+  
+  provisioner "file" {
+    source      = "continue_installation.sh"
+    destination = "/home/ubuntu/continue_installation.sh"
+  }
+
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'export DB_HOST=${aws_db_instance.default.endpoint}' >> ~/.bashrc",
-      "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
-      "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
-      "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc",
-      "source /home/ubuntu/.bashrc"
+      "bash -c 'echo export DB_HOST=${aws_db_instance.default.endpoint} >> ~/.bashrc'",
+      "bash -c 'echo export DB_USER=${data.aws_ssm_parameter.db-username.value} >> ~/.bashrc'",
+      "bash -c 'echo export DB_NAME=${data.aws_ssm_parameter.db-name.value} >> ~/.bashrc'",
+      "bash -c 'echo export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value} >> ~/.bashrc'",
+      "bash -c 'source /home/ubuntu/.bashrc'"
+
     ]
   }
 
   provisioner "remote-exec" {
     script = "./installation.sh"
   }
-
 
 }
 
