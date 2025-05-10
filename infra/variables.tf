@@ -40,7 +40,7 @@ variable "vpc-name" {
 
 
 variable "ami" {
-    default = "ami-053b0d53c279acc90"  # Ubuntu 22.04 LTS AMI in us-east-1
+    default = "ami-04b4f1a9cf54c11d0"  # Ubuntu 24.04 LTS AMI in us-east-1
     type    = string
 }
 

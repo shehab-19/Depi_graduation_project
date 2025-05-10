@@ -167,16 +167,13 @@ resource "null_resource" "fetch_token" {
     destination = "/home/ubuntu/"
   }
 
-  #   provisioner "remote-exec" {
-  #   script = "./env.sh"
-  # }
-
     provisioner "remote-exec" {
       inline = [
         "echo 'export DB_HOST=${aws_db_instance.default.endpoint}' >> ~/.bashrc",
         "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
         "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
-        "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc"
+        "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc",
+        "source /home/ubuntu/.bashrc"
       ]
     }
 
@@ -184,50 +181,8 @@ resource "null_resource" "fetch_token" {
       script = "./installation.sh"
     }
 
-    
+   
 }
 
-# null resource fetch token 
-# take output of null resourse > remote exec from the output of the null resourse
-
-
-
-# ubuntu 22.04 ami
-# t2.medium   
-
-
-
-# one instances (controlplane and worker node) 
-# user data for installing kubernetes (kind + helm + kubectl + docker + )
-# in the machine (ec2) create env vars 
-# public access (dns public  )
-# Test 
-
-# helm install qrcode ./QRCode_APP   \
-# --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
-# --set-string Secret.DB_HOST="$DB_HOST"   \
-# --set-string Secret.DB_NAME="$DB_NAME"  \
-#  --set-string Secret.DB_USER="$DB_USER"
-
-
-
-# two instances kubeadm user data for installing kubernetes (kubeadm + helm + kubectl + 7agat moustafa )
-# insert env vars 
-# worker node ( kubeadm join )
-
-# test 
-
-# helm install qrcode ./QRCode_APP   \
-# --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
-# --set-string Secret.DB_HOST="$DB_HOST"   \
-# --set-string Secret.DB_NAME="$DB_NAME"  \
-#  --set-string Secret.DB_USER="$DB_USER"
-
-# ansible playbook 
-# copying the files 
-# running helm 
-
-
-# file provisioner remote provisioner null resourse 
 
 

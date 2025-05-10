@@ -4,9 +4,6 @@ data "aws_ssm_parameter" "db-password" {
 data "aws_ssm_parameter" "db-username" {
   name = "/qr/dbuser"
 }
-# data "aws_ssm_parameter" "db-host" {
-#   name = "/qr/dbhost"
-# }
 
 data "aws_ssm_parameter" "db-name" {
   name = "/qr/dbname"
