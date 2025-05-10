@@ -42,21 +42,6 @@
   The entire codebase is maintained on GitHub for collaboration, version tracking, and integration with CI/CD workflows if needed.
 
 ---
-## 📁 Project Structure
-'''
-├── backend/ # Backend application (API logic for QR code generation)
-├── frontend/ # Frontend assets (HTML/CSS/JS)
-├── charts/ # Helm charts for Kubernetes deployment
-├── terraform/
-│ ├── main.tf # Root configuration for AWS infra
-│ └── rds.tf # RDS provisioning (MSSQL)
-├── kind-config/ # Configuration files for setting up Kind
-├── installation.sh # Script to install Kind, Helm, Ingress, etc.
-├── docker-compose.yml # Optional: for local Docker-based testing
-├── .env # Local environment variables (credentials, configs)
-└── README.md # Project documentation '''
-
----
 
 ## 🔐 Secrets Management
 
