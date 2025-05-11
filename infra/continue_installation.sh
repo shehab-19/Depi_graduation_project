@@ -34,6 +34,12 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
+  - containerPort: 30080
+    hostPort: 30080
+    protocol: TCP
+- role: worker
+- role: worker
+- role: worker
 EOF
 
 kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
@@ -58,5 +64,42 @@ helm install qrcode ./QRCode_APP_Chart   \
   --set-string Secret.DB_NAME="$DB_NAME"   \
   --set-string Secret.DB_USER="$DB_USER"   \
   --set-string Ingress.HostName="$URL" 
+
+# ====================== Install Argo CD ======================
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.0/manifests/install.yaml
+
+# Wait for Argo CD to be ready
+echo "Waiting for Argo CD to be ready..."
+kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd
+
+# ====================== Install Argo CD CLI ======================
+wget https://github.com/argoproj/argo-cd/releases/download/v3.0.0/argocd-linux-amd64
+chmod +x argocd-linux-amd64
+sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+
+echo "===== Exposing Argo CD API server via NodePort ====="
+kubectl patch svc argocd-server -n argocd --type='merge' -p '{
+  "spec": {
+    "type": "NodePort",
+    "ports": [
+      {
+        "port": 443,
+        "targetPort": 8080,
+        "nodePort": 30080,
+        "protocol": "TCP",
+        "name": "https"
+      }
+    ]
+  }
+}'
+# ====================== Login in Argo CD  ======================
+
+argocd login "$(curl -s http://checkip.amazonaws.com):30080" \
+  --username admin \
+  --password "$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)" \
+  --insecure \
+  --grpc-web
+kubectl apply -f /home/ubuntu/argocd.yaml
 
 

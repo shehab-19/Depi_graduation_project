@@ -42,7 +42,6 @@ resource "aws_security_group" "db_sg" {
 
 resource "aws_db_instance" "default" {
   allocated_storage = 20
-  # db_name              = data.aws_ssm_parameter.db-name.value
   identifier           = "database01"
   db_subnet_group_name = aws_db_subnet_group.subnet_group.name
   engine               = "sqlserver-ex"
@@ -50,7 +49,6 @@ resource "aws_db_instance" "default" {
   instance_class       = "db.t3.micro"
   username             = data.aws_ssm_parameter.db-username.value
   password             = data.aws_ssm_parameter.db-password.value
-  # parameter_group_name = "default.mysql8.0"
   multi_az            = false
   storage_type        = "gp2"
   storage_encrypted   = true
