@@ -366,3 +366,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+tls.*
+*.terraform/
+*.tfstate
+*.tfstate.*
+*env.sh
+*.terraform.lock*
