@@ -180,7 +180,7 @@ resource "null_resource" "fetch_token" {
 
   provisioner "remote-exec" {
     inline = [
-      "bash -c 'echo export DB_HOST=${split(":", var.dns-endpoint)[0]} >> ~/.bashrc'",
+      "bash -c 'echo export DB_HOST=${replace(split(":", replace(var.dns-endpoint, "https://", ""))[0], "/$", "")} >> ~/.bashrc'",
       "bash -c 'echo export DB_HOST=${var.dns-endpoint} >> ~/.bashrc'",
       "bash -c 'echo export DB_USER=${data.aws_ssm_parameter.db-username.value} >> ~/.bashrc'",
       "bash -c 'echo export DB_NAME=${data.aws_ssm_parameter.db-name.value} >> ~/.bashrc'",
