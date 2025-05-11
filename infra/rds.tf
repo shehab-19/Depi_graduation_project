@@ -76,10 +76,4 @@ resource "aws_db_subnet_group" "subnet_group" {
 }
 
 
-output "db-endpoint" {
-  value = aws_db_instance.default.endpoint
-}
 
-output "server-ip" {
-  value = aws_instance.controlplane.public_ip
-}

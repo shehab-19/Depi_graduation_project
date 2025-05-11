@@ -56,4 +56,7 @@ helm install qrcode ./QRCode_APP_Chart   \
   --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
   --set-string Secret.DB_HOST="$DB_HOST"   \
   --set-string Secret.DB_NAME="$DB_NAME"   \
-  --set-string Secret.DB_USER="$DB_USER"
+  --set-string Secret.DB_USER="$DB_USER"   \
+  --set-string Ingress.HostName="$URL" 
+
+

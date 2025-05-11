@@ -87,7 +87,7 @@ resource "aws_route_table_association" "public" {
 
 
 resource "aws_security_group" "web_sg" {
-  name        = "controlplane-sg"
+  name        = "web_server-sg"
   description = "Security group for web app"
   vpc_id      = aws_vpc.main.id
 
@@ -139,7 +139,7 @@ resource "aws_key_pair" "mykey" {
 
 
 
-resource "aws_instance" "controlplane" {
+resource "aws_instance" "web_server" {
   ami                    = var.ami
   instance_type          = var.t2-instance_type
   subnet_id              = aws_subnet.public.id
@@ -147,18 +147,18 @@ resource "aws_instance" "controlplane" {
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   depends_on             = [aws_db_instance.default]
   tags = {
-    Name = "controlplane"
+    Name = "web_server"
   }
 
 }
 
-resource "null_resource" "fetch_token" {
-  depends_on = [aws_instance.controlplane]
+resource "null_resource" "setup_environment" {
+  depends_on = [aws_instance.web_server]
 
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    host        = aws_instance.controlplane.public_ip
+    host        = aws_instance.web_server.public_ip
     private_key = file("~/.ssh/deployer")
   }
 
@@ -175,12 +175,12 @@ resource "null_resource" "fetch_token" {
 
   provisioner "remote-exec" {
     inline = [
-      "bash -c 'echo export DB_HOST=${aws_db_instance.default.endpoint} >> ~/.bashrc'",
-      "bash -c 'echo export DB_USER=${data.aws_ssm_parameter.db-username.value} >> ~/.bashrc'",
-      "bash -c 'echo export DB_NAME=${data.aws_ssm_parameter.db-name.value} >> ~/.bashrc'",
-      "bash -c 'echo export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value} >> ~/.bashrc'",
-      "bash -c 'source /home/ubuntu/.bashrc'"
-
+      "echo 'export DB_HOST=${split(":", aws_db_instance.default.endpoint )[0]}' >> ~/.bashrc",
+      "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
+      "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
+      "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc",
+      "echo 'export URL=${aws_instance.web_server.public_dns}' >> ~/.bashrc",
+      "source /home/ubuntu/.bashrc"
     ]
   }
 
