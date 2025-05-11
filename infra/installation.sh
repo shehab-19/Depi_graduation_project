@@ -1,78 +1,23 @@
 #!/bin/bash
 
-set -e
-
-# Install Docker (required for kind)
-echo "Installing Docker..."
-sudo apt-get install -y docker.io
-sudo systemctl enable docker
-sudo systemctl start docker
-
-# Enable IP forwarding
-echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-
-# Disable swap (Kubernetes requirement)
-sudo swapoff -a
-
-# Install kubectl
-echo "Installing kubectl..."
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | \
-  gpg --dearmor | \
-  sudo tee /etc/apt/keyrings/kubernetes-apt-keyring.gpg > /dev/null
-
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
+set -e # Exit immediately if a command exits with a non-zero status
+# ======================================= Docker Installation ==================================================
+# Add Docker's official GPG key:
 sudo apt-get update
-sudo apt-get install -y kubectl
-sudo apt-mark hold kubectl
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# Install Helm
-echo "Installing Helm..."
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
-sudo apt-get install -y helm
-
-# Install Kind
-echo "Installing Kind..."
-ARCH=$(uname -m)
-if [ "$ARCH" = "x86_64" ]; then
-  curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
-elif [ "$ARCH" = "aarch64" ]; then
-  curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-arm64
-else
-  echo "Unsupported architecture: $ARCH"
-  exit 1
-fi
-chmod +x ./kind
-sudo mv ./kind /usr/local/bin/kind
-
-# Create Kind cluster config with ingress ports
-cat <<EOF > kind-config.yaml
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-  - role: control-plane
-    extraPortMappings:
-      - containerPort: 80
-        hostPort: 80
-      - containerPort: 443
-        hostPort: 443
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker ubuntu
+exec sudo -u ubuntu -i bash <<'EOF'
+bash /home/ubuntu/continue_installation.sh
 EOF
 
-# Create Kind cluster
-kind create cluster --config kind-config.yaml
-
-# Install Ingress Controller for Kind
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/kind/deploy.yaml
-
-# Wait for ingress controller
-kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=180s || true
-
-# Install the QR Code application via Helm
-helm install qrcode ./QRCode_APP_Chart   \
-  --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
-  --set-string Secret.DB_HOST="$DB_HOST"   \
-  --set-string Secret.DB_NAME="$DB_NAME"   \
-  --set-string Secret.DB_USER="$DB_USER"

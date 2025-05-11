@@ -1,8 +1,8 @@
 resource "aws_vpc" "main" {
-  cidr_block       = "10.0.0.0/16"
-  instance_tenancy = "default"
+  cidr_block           = "10.0.0.0/16"
+  instance_tenancy     = "default"
   enable_dns_hostnames = "true"
-  enable_dns_support = "true"
+  enable_dns_support   = "true"
 
   tags = {
     Name = var.vpc-name
@@ -12,25 +12,25 @@ resource "aws_vpc" "main" {
 
 
 resource "aws_subnet" "public" {
-    vpc_id = aws_vpc.main.id
-    cidr_block = var.public-subnet-cidr_block
-    availability_zone = var.az
-    map_public_ip_on_launch = true
-    tags = {
-        Name = "public-subnet"
-    }
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.public-subnet-cidr_block
+  availability_zone       = var.az
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet"
+  }
 }
 
 
 
 resource "aws_subnet" "public2" {
-    vpc_id = aws_vpc.main.id
-    cidr_block = var.public-subnet-cidr_block2
-    availability_zone = var.az
-    map_public_ip_on_launch = true
-    tags = {
-        Name = "public-subnet2"
-    }
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.public-subnet-cidr_block2
+  availability_zone       = var.az
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet2"
+  }
 }
 
 resource "aws_subnet" "private1" {
@@ -69,11 +69,11 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    
+
     Name = var.public-rtb-name
   }
 
- route {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
@@ -81,50 +81,57 @@ resource "aws_route_table" "public" {
 
 
 resource "aws_route_table_association" "public" {
-    subnet_id = aws_subnet.public.id
-    route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
 }
 
 
 resource "aws_security_group" "web_sg" {
-    name        = "controlplane-sg"
-    description = "Security group for web app"
-    vpc_id      = aws_vpc.main.id
-
-  
-    # web access from anywhere
-    ingress {
-        from_port   = 80
-        to_port     = 80
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    ingress {
-        from_port   = 6443
-        to_port     = 6443
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  name        = "web_server-sg"
+  description = "Security group for web app"
+  vpc_id      = aws_vpc.main.id
 
 
-    ingress  {
-        from_port   = 22
-        to_port     = 22
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-        }
+  # web access from anywhere
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    egress {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  ingress {
+    from_port   = 6443
+    to_port     = 6443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    tags = {
-        Name = "server-security-group"
-    }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 30080
+    to_port     = 30080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "server-security-group"
+  }
 
 }
 
@@ -132,102 +139,68 @@ resource "aws_security_group" "web_sg" {
 
 resource "aws_key_pair" "mykey" {
   key_name   = "mykey"
-  public_key = file("~/.ssh/deployer.pub")  
+  public_key = file("~/.ssh/deployer.pub")
 }
 
 
 
 
 
-resource "aws_instance" "controlplane" {
-  ami           = var.ami
-  instance_type = var.t2-instance_type
-  subnet_id     = aws_subnet.public.id
-  key_name      = aws_key_pair.mykey.key_name
+resource "aws_instance" "web_server" {
+  ami                    = var.ami
+  instance_type          = var.t2-instance_type
+  subnet_id              = aws_subnet.public.id
+  key_name               = aws_key_pair.mykey.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  depends_on = [ aws_db_instance.default ]
+  depends_on             = [aws_db_instance.default]
   tags = {
-    Name = "controlplane"
+    Name = "web_server"
   }
-  
+
 }
 
-resource "null_resource" "fetch_token" {
-    depends_on = [aws_instance.controlplane]
+resource "null_resource" "setup_environment" {
+  depends_on = [aws_instance.web_server]
 
-    connection {
-        type     = "ssh"
-        user     = "ubuntu"
-        host     = aws_instance.controlplane.public_ip
-        private_key = file("~/.ssh/deployer")
-    }
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    host        = aws_instance.web_server.public_ip
+    private_key = file("~/.ssh/deployer")
+  }
 
-     provisioner "file" {
+  provisioner "file" {
     source      = "../QRCode_APP_Chart"
     destination = "/home/ubuntu/"
   }
+  
+  provisioner "file" {
+    source      = "continue_installation.sh"
+    destination = "/home/ubuntu/continue_installation.sh"
+  }
 
-  #   provisioner "remote-exec" {
-  #   script = "./env.sh"
-  # }
+  provisioner "file" {
+    source      = "argocd.yaml"
+    destination = "/home/ubuntu/argocd.yaml"
+  }
 
-    provisioner "remote-exec" {
-      inline = [
-        "echo 'export DB_HOST=${aws_db_instance.default.endpoint}' >> ~/.bashrc",
-        "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
-        "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
-        "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc"
-      ]
-    }
 
-    provisioner "remote-exec" {
-      script = "./installation.sh"
-    }
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'export DB_HOST=${split(":", aws_db_instance.default.endpoint )[0]}' >> ~/.bashrc",
+      "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
+      "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
+      "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc",
+      "echo 'export URL=${aws_instance.web_server.public_dns}' >> ~/.bashrc",
+      "source /home/ubuntu/.bashrc"
+    ]
+  }
 
-    
+  provisioner "remote-exec" {
+    script = "./installation.sh"
+  }
+
 }
 
-# null resource fetch token 
-# take output of null resourse > remote exec from the output of the null resourse
-
-
-
-# ubuntu 22.04 ami
-# t2.medium   
-
-
-
-# one instances (controlplane and worker node) 
-# user data for installing kubernetes (kind + helm + kubectl + docker + )
-# in the machine (ec2) create env vars 
-# public access (dns public  )
-# Test 
-
-# helm install qrcode ./QRCode_APP   \
-# --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
-# --set-string Secret.DB_HOST="$DB_HOST"   \
-# --set-string Secret.DB_NAME="$DB_NAME"  \
-#  --set-string Secret.DB_USER="$DB_USER"
-
-
-
-# two instances kubeadm user data for installing kubernetes (kubeadm + helm + kubectl + 7agat moustafa )
-# insert env vars 
-# worker node ( kubeadm join )
-
-# test 
-
-# helm install qrcode ./QRCode_APP   \
-# --set-string Secret.DB_PASSWORD="$DB_PASSWORD"   \
-# --set-string Secret.DB_HOST="$DB_HOST"   \
-# --set-string Secret.DB_NAME="$DB_NAME"  \
-#  --set-string Secret.DB_USER="$DB_USER"
-
-# ansible playbook 
-# copying the files 
-# running helm 
-
-
-# file provisioner remote provisioner null resourse 
 
 
