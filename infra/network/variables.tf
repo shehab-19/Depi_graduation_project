@@ -1,0 +1,12 @@
+variable "vpc_cidr" {}
+variable "vpc-name" {}
+variable "ami" {}
+variable "t2-instance_type" {}
+variable "public-subnet-cidr_block" {}
+variable "public-subnet-cidr_block2" {}
+variable "private-subnet-cidr1" {}
+variable "private-subnet-cidr2" {}
+variable "az" {}
+variable "az2" {}
+variable "igw-name" {}
+variable "public-rtb-name" {}
