@@ -1,0 +1,15 @@
+{{- $root := . }}
+{{- with .Values.Service }}
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: {{ .ServiceName }}
+spec:
+  selector:
+    {{- include "labels" $root }}
+  ports:
+    - port: {{ .ServicePort }}
+      targetPort: {{ $root.Values.Port.PortName }}
+      protocol: TCP
+  type: ClusterIP
+{{- end }}
