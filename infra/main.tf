@@ -179,6 +179,11 @@ resource "null_resource" "setup_environment" {
     destination = "/home/ubuntu/continue_installation.sh"
   }
 
+  provisioner "file" {
+    source      = "argocd.yaml"
+    destination = "/home/ubuntu/argocd.yaml"
+  }
+
 
   provisioner "remote-exec" {
     inline = [

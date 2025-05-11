@@ -50,4 +50,4 @@ Secret:
 # Ingress
 Ingress:
   IngressName: qrcode-app-ingress
-  HostName: qrcode.local
+  HostName: 
