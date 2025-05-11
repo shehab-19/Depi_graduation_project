@@ -12,7 +12,7 @@ services:
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
     networks:
       - qrcodeapp
-    mem_limit: 700m
+    mem_limit: 900m
 
   qrcodeapp:
     container_name: qrcode-app

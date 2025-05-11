@@ -41,11 +41,15 @@
 # Navigate to the QRCodeApp directory
 cd QRCodeApp
 
+# Create and configure your .env file based on the template
+cp .env.example .env
+# Edit the .env file with your desired configuration
+
 # Start the application and database
 docker compose up --build
 ```
 
-The application will be available at http://localhost:9000
+The application will be available at http://localhost:${EXTERNAL_APP_PORT}
 
 ### 2. Kubernetes Deployment with Kind
 
@@ -90,11 +94,17 @@ This will:
 
 ## 🛠️ Environment Variables
 
-The application uses the following environment variables:
+The application uses the following environment variables which should be defined in a `.env` file based on the provided `.env.example` template:
+
 - `DB_HOST`: Database hostname
 - `DB_NAME`: Database name
 - `DB_USER`: Database username
 - `DB_PASSWORD`: Database password
+- `APP_PORT`: Application internal port
+- `EXTERNAL_APP_PORT`: Application external port
+- `DB_PORT`: Database internal port
+- `EXTERNAL_DB_PORT`: Database external port
+- `DOCKER_REGISTRY`: (Optional) Docker registry URL
 
 ## 📦 Dependencies
 
@@ -115,7 +125,6 @@ The application uses the following environment variables:
 
 - Database credentials are managed through environment variables
 - SSL/TLS encryption for database connections
-- HTTPS redirection enabled
 - Kubernetes secrets for sensitive data
 - AWS security groups for network isolation
 
@@ -131,7 +140,7 @@ The application uses the following environment variables:
 
 This QR Code Generator and Scanner application demonstrates a complete end-to-end solution combining modern web technologies with cloud-native deployment practices. Key highlights include:
 
-- **Modern Web Stack**: Utilizes Bootstrap and jQuery for a responsive, user-friendly interface while leveraging ASP.NET Core's powerful Razor view engine
+- **Modern Web Stack**: Utilizes Bootstrap for a responsive, user-friendly interface while leveraging ASP.NET Core's powerful Razor view engine
 - **Scalable Architecture**: Built with cloud-native principles, supporting containerization and orchestration
 - **DevOps Best Practices**: Implements Infrastructure as Code, automated deployments, and proper secret management
 - **Production Ready**: Includes comprehensive documentation, deployment options, and security considerations
