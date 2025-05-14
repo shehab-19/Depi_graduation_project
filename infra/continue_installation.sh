@@ -48,7 +48,7 @@ sleep 5
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
-  --timeout=180s
+  --timeout=250s
 
 # ======================================= Helm Installtion ==================================================
 curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
@@ -69,9 +69,10 @@ helm install qrcode ./QRCode_APP_Chart   \
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.0/manifests/install.yaml
 
+sleep 5
 # Wait for Argo CD to be ready
 echo "Waiting for Argo CD to be ready..."
-kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n argocd
+kubectl wait --for=condition=available --timeout=250s deployment/argocd-server -n argocd
 
 # ====================== Install Argo CD CLI ======================
 wget https://github.com/argoproj/argo-cd/releases/download/v3.0.0/argocd-linux-amd64
@@ -95,11 +96,14 @@ kubectl patch svc argocd-server -n argocd --type='merge' -p '{
 }'
 # ====================== Login in Argo CD  ======================
 
+ARGOCD_PWD=$(kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d)
 argocd login "$(curl -s http://checkip.amazonaws.com):30080" \
   --username admin \
-  --password "$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)" \
+  --password "$ARGOCD_PWD" \
   --insecure \
   --grpc-web
+echo "ArgoCD admin password: $ARGOCD_PWD"
 kubectl apply -f /home/ubuntu/argocd.yaml
 
 

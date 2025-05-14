@@ -153,6 +153,10 @@ resource "aws_instance" "web_server" {
   key_name               = aws_key_pair.mykey.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   depends_on             = [aws_db_instance.default]
+  root_block_device {
+    volume_size = 30   
+    volume_type = "gp3"
+  }
   tags = {
     Name = "web_server"
   }
@@ -187,14 +191,15 @@ resource "null_resource" "setup_environment" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'export DB_HOST=${split(":", aws_db_instance.default.endpoint )[0]}' >> ~/.bashrc",
-      "echo 'export DB_USER=${data.aws_ssm_parameter.db-username.value}' >> ~/.bashrc",
-      "echo 'export DB_NAME=${data.aws_ssm_parameter.db-name.value}' >> ~/.bashrc",
-      "echo 'export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value}' >> ~/.bashrc",
-      "echo 'export URL=${aws_instance.web_server.public_dns}' >> ~/.bashrc",
-      "source /home/ubuntu/.bashrc"
+      "bash -c 'echo export DB_HOST=${split(":", aws_db_instance.default.endpoint)[0]} >> ~/.bashrc'",
+      "bash -c 'echo export DB_USER=${data.aws_ssm_parameter.db-username.value} >> ~/.bashrc'",
+      "bash -c 'echo export DB_NAME=${data.aws_ssm_parameter.db-name.value} >> ~/.bashrc'",
+      "bash -c 'echo export DB_PASSWORD=${data.aws_ssm_parameter.db-password.value} >> ~/.bashrc'",
+      "bash -c 'echo export URL=${aws_instance.web_server.public_dns} >> ~/.bashrc'",
+      "bash -c 'source ~/.bashrc'"
     ]
   }
+
 
   provisioner "remote-exec" {
     script = "./installation.sh"
